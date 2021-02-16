@@ -7,7 +7,7 @@ dpkg_src = _dpkg_src
 def package_manager_repositories():
   http_file(
       name = "dpkg_parser",
-      urls = [('https://storage.googleapis.com/distroless/package_manager_tools/548be30ea343ebf1e3729e1334b8adca8957e0c1/dpkg_parser.par')],
+      urls = [('https://artifactory.build.nvda.ai/artifactory/nucleus/thirdparty/bazel/dpkg_parser/dpkg_parser-0.15.par')],
       executable = True,
-      sha256 = "2ca62e67ce4d79a3f4072908559beef9f9c15e1a0f8dbc72a92c046f7c0c9df6",
+      sha256 = "3e28a15046e9a9a207ae718b4acffb7d91c5f768caf3c3cac0a89933863c6bd9",
   )

@@ -17,8 +17,8 @@ import gzip
 import json
 import os
 import io
+import base64                    
 import netrc
-
 from six.moves import urllib
 
 from package_manager.parse_metadata import parse_package_metadata
@@ -63,13 +63,7 @@ parser.add_argument("--packages-gz-url", action='store',
                     help='The full url for the Packages.gz file')
 parser.add_argument("--package-prefix", action='store',
                     help='The prefix to prepend to the value of Filename key in the Packages.gz file.')
-def urlopen(url):
-    parts = urlparse(url)
-    login, account, password = netrc.netrc().authenticators(parts.netloc)
-    request = urllib2.Request(url)
-    creds = base64.encodestring('%s:%s' % (login, password)).strip()
-    request.add_header("Authorization", "Basic %s" % creds)
-    return urllib2.urlopen(request)
+
 
 def main():
     """ A tool for downloading debian packages and package metadata """
@@ -80,6 +74,14 @@ def main():
         util.build_os_release_tar(args.distro, OS_RELEASE_FILE_NAME, OS_RELEASE_PATH, OS_RELEASE_TAR_FILE_NAME)
     else:
         download_dpkg(args.package_files, args.packages, args.workspace_name)
+
+def urlopen(url):
+    parts = urllib.parse.urlparse(url)
+    login, account, password = netrc.netrc().authenticators(parts.netloc)
+    request = urllib.request.Request(url)
+    creds = base64.b64encode(('%s:%s' % (login, password)).encode()).decode().strip()
+    request.add_header("Authorization", "Basic %s" % creds)
+    return urllib.request.urlopen(request)
 
 def download_dpkg(package_files, packages, workspace_name):
     """ Using an unzipped, json package file with full urls,
