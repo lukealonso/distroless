@@ -17,6 +17,7 @@ import gzip
 import json
 import os
 import io
+import netrc
 
 from six.moves import urllib
 
@@ -62,7 +63,13 @@ parser.add_argument("--packages-gz-url", action='store',
                     help='The full url for the Packages.gz file')
 parser.add_argument("--package-prefix", action='store',
                     help='The prefix to prepend to the value of Filename key in the Packages.gz file.')
-
+def urlopen(url):
+    parts = urlparse(url)
+    login, account, password = netrc.netrc().authenticators(parts.netloc)
+    request = urllib2.Request(url)
+    creds = base64.encodestring('%s:%s' % (login, password)).strip()
+    request.add_header("Authorization", "Basic %s" % creds)
+    return urllib2.urlopen(request)
 
 def main():
     """ A tool for downloading debian packages and package metadata """
@@ -101,7 +108,7 @@ def download_dpkg(package_files, packages, workspace_name):
             (pkg_version == "" or
             pkg_version == metadata[pkg_name][VERSION_KEY])):
                 pkg = metadata[pkg_name]
-                buf = urllib.request.urlopen(pkg[FILENAME_KEY])
+                buf = urlopen(pkg[FILENAME_KEY])
                 package_to_rule_map[pkg_name] = util.package_to_rule(workspace_name, pkg_name)
                 package_to_version_map[pkg_name] = metadata[pkg_name][VERSION_KEY]
                 out_file = os.path.join("file", util.encode_package_name(pkg_name))
@@ -175,7 +182,7 @@ SHA256: 52ec3ac93cf8ba038fbcefe1e78f26ca1d59356cdc95e60f987c3f52b3f5e7ef
             arch
         )
 
-    buf = urllib.request.urlopen(url)
+    buf = urlopen(url)
     with io.open("Packages.gz", 'wb') as f:
         f.write(buf.read())
     actual_sha256 = util.sha256_checksum("Packages.gz")
