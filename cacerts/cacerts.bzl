@@ -10,6 +10,7 @@ def _impl(ctx):
         ],
         inputs = [ctx.file.deb],
         outputs = [ctx.outputs.tar, ctx.outputs.deb],
+        execution_requirements = {"no-remote-exec": "1"},
     )
 
 cacerts = rule(
